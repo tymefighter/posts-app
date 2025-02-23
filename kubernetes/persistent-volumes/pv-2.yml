@@ -11,7 +11,7 @@ spec:
   persistentVolumeReclaimPolicy: Delete
   storageClassName: local-storage
   local:
-    path: /mnt/disks/disk2
+    path: /mnt/disks/disk-2
   nodeAffinity:
     required:
       nodeSelectorTerms:
