@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql-app
+  labels:
+    app: mysql-app
+spec:
+  selector:
+    matchLabels:
+      app: mysql-app
+  serviceName: mysql-headless-service
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: mysql-app
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mysql
+          image: perconalab/percona-xtradb-cluster:5.6
+          ports:
+            - containerPort: 3306
+              name: mysql-port-0
+            - containerPort: 4567
+              name: mysql-port-1
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: k8spassword
+            - name: DISCOVERY_SERVICE
+              value: etcd-service:2379
+            - name: XTRABACKUP_PASSWORD
+              value: k8spassword
+            - name: CLUSTER_NAME
+              value: percona
+          volumeMounts:
+            - name: db
+              mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+    - metadata:
+        name: db
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 100Mi
+        storageClassName: local-storage
